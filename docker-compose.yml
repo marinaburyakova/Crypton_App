@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  # Наш бэкенд и фронтенд на Next.js
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: finflow-nextjs-app
+    ports:
+      - "3000:3000"
+    # 1. Загружаем ВСЕ переменные из файла .env автоматически
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=production
+      # 2. Переопределяем DB_HOST, так как внутри Docker-сети база называется "db"
+      - DB_HOST=db
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # База данных MySQL
+  db:
+    image: mysql:8.0
+    container_name: finflow-mysql-db
+    restart: always
+    ports:
+      - "3306:3306"
+    # 3. Подставляем значения из .env динамически. В самом файле паролей больше нет!
+    environment:
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root_secure_master_pass}
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    # 4. В healthcheck тоже динамически подставляем данные пользователя
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "${DB_USER}", "-p${DB_PASSWORD}"]
+      timeout: 5s
+      retries: 5
+      
+  # Визуальный менеджер базы данных в браузере
+  adminer:
+    image: adminer:latest
+    container_name: finflow-adminer
+    restart: always
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  mysql_data:
