@@ -24,7 +24,7 @@ export async function createTransaction(formData: {
         Math.floor(Math.random() * 16).toString(16),
       ).join('')
 
-    // ИСПОРАВЛЕНО: используем camelCase свойства, которые требует схема Drizzle
+    // используем camelCase свойства, которые требует схема Drizzle
     await db.insert(transactions).values({
       userId: mockUserId, // вместо user_id
       amount: formData.amount,
@@ -41,4 +41,43 @@ export async function createTransaction(formData: {
     console.error('Ошибка при сохранении транзакции:', error)
     return { success: false, error: 'Не удалось отправить средства' }
   }
+}
+
+
+export async function seedTransactions() {
+  const tokens = ['USDT', 'BTC', 'ETH', 'SOL'];
+  const networks = ['TRC-20', 'Bitcoin', 'ERC-20', 'Solana'];
+  const types: ('SEND' | 'RECEIVE')[] = ['SEND', 'RECEIVE'];
+  
+  const mockTransactions = [];
+  
+  // Генерируем 50 транзакций за последние 30 дней
+  for (let i = 0; i < 50; i++) {
+    const randomDaysAgo = Math.floor(Math.random() * 30);
+    const date = new Date();
+    date.setDate(date.getDate() - randomDaysAgo);
+    
+    // Случайное время в течение дня
+    date.setHours(Math.floor(Math.random() * 24), Math.floor(Math.random() * 60));
+
+    const txHash = '0x' + Array.from({ length: 40 }, () => Math.floor(Math.random() * 16).toString(16)).join('');
+
+    mockTransactions.push({
+      userId: 1,
+      amount: (Math.random() * 500 + 10).toFixed(2), // Суммы от $10 до $510
+      tokenSymbol: tokens[Math.floor(Math.random() * tokens.length)],
+      network: networks[Math.floor(Math.random() * networks.length)],
+      type: types[Math.floor(Math.random() * types.length)],
+      txHash: txHash,
+      status: 'SUCCESS',
+      createdAt: date // Разные даты для красивого таймлайна на графике
+    });
+  }
+
+  // Массовая вставка в MySQL через Drizzle
+  await db.insert(transactions).values(mockTransactions);
+  
+  // Сбрасываем кэш страницы, чтобы данные сразу появились
+  revalidatePath('/dashboard');
+  return { success: true };
 }

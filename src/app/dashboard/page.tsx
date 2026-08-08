@@ -1,16 +1,29 @@
-import DashboardClient from './DashboardClient';
-import { getTransactions } from './actions';
+import DashboardClient from './DashboardClient'
+import { getTransactions } from './actions'
+import { InferSelectModel } from 'drizzle-orm'
+import { transactions } from '@/db/schema' // импортируем вашу таблицу для вытягивания типа
 
-// Это серверный компонент по умолчанию
+export const dynamic = 'force-dynamic'
+
+// Создаем строгий тип транзакции на основе схемы Drizzle
+type DbTransaction = InferSelectModel<typeof transactions>
+
 export default async function DashboardPage() {
-  // Прямой запрос в базу данных MySQL при загрузке страницы
-  const dbTransactions = await getTransactions();
+  // Комментируем эту строку, данные уже в базе!
+  // await seedTransactions();
 
-  // Форматируем данные, если даты из БД приходят в виде объектов Date
-  const formattedTransactions = dbTransactions.map(tx => ({
+  const dbTransactions = await getTransactions()
+
+  // ИСПРАВЛЕНО: указали точный тип DbTransaction вместо any
+  const formattedTransactions = dbTransactions.map((tx: DbTransaction) => ({
     ...tx,
-    created_at: tx.createdAt ? new Date(tx.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Только что'
-  }));
+    created_at: tx.createdAt
+      ? new Date(tx.createdAt).toLocaleTimeString([], {
+          hour: '2-digit',
+          minute: '2-digit',
+        })
+      : 'Только что',
+  }))
 
-  return <DashboardClient initialTransactions={formattedTransactions} />;
+  return <DashboardClient initialTransactions={formattedTransactions} />
 }
