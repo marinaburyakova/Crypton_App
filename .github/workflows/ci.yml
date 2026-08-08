@@ -49,7 +49,7 @@ jobs:
 
       # 5. Устанавливаем зависимости проекта
       - name: Install dependencies
-        run: npm install --legacy-peer-deps
+        run: npm install 
 
       # 6. Собираем продакшен-версию приложения (standalone)
       - name: Build application
