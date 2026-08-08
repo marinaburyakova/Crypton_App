@@ -25,7 +25,7 @@ export default function OnboardingLayout({ children }: { children: React.ReactNo
             <ChevronLeft className="w-5 h-5" />
           </button>
         )}
-        <Progress value={progressValue} className="h-2 w-full transition-all duration-300" />
+        <Progress value={progressValue} suppressHydrationWarning className="h-2 w-full transition-all duration-300" />
         <span className="text-xs font-medium text-slate-500 min-w-10 text-right">Шаг {step}/3</span>
       </header>
       

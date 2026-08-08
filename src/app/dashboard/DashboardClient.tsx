@@ -30,7 +30,7 @@ import {
   Cell,
 } from 'recharts'
 
-import { createTransaction} from './actions'
+import { createTransaction } from './actions'
 
 // Структура транзакции
 interface Transaction {
@@ -49,18 +49,17 @@ interface Transaction {
 // Цвета для диаграммы
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8']
 
-
-
 export default function DashboardClient({
   initialTransactions,
   currentBalance,
   weeklyChartData,
+  tonBalance,
 }: {
   initialTransactions: Transaction[]
-  currentBalance: number,
-  weeklyChartData: { name: string; income: number }[];
+  currentBalance: number
+  weeklyChartData: { name: string; income: number }[]
+  tonBalance: number
 }) {
-  
   const [activeModal, setActiveModal] = useState<'send' | 'receive' | null>(
     null,
   )
@@ -224,7 +223,14 @@ export default function DashboardClient({
                   maximumFractionDigits: 2,
                 })}
               </h2>
-              <p className="text-xs text-indigo-200/80">≈ 1,245.50 TON</p>
+              <p className="text-[11px] text-indigo-150 font-medium opacity-90">
+                ≈{' '}
+                {tonBalance.toLocaleString('en-US', {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}{' '}
+                TON
+              </p>
             </div>
 
             <div className="grid grid-cols-2 gap-3 relative z-10">
@@ -259,7 +265,7 @@ export default function DashboardClient({
                 height="100%"
               >
                 <AreaChart
-                  data={weeklyChartData} 
+                  data={weeklyChartData}
                   margin={{ top: 5, right: 5, left: -35, bottom: 0 }}
                 >
                   <defs>
