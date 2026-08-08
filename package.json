@@ -2,13 +2,16 @@
   "name": "finflow-onboarding",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "drizzle-kit push"
+    "db:migrate": "drizzle-kit push",
+    "test": "vitest",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",
@@ -37,10 +40,12 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@vitejs/plugin-react": "^6.0.5",
     "drizzle-kit": "^0.31.10",
     "eslint": "^9",
     "eslint-config-next": "16.3.0",
     "tailwindcss": "^4.3.3",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.1.10"
   }
 }

@@ -12,6 +12,12 @@
 
 # testing
 /coverage
+.vitest-result/
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/
 
 # next.js
 /.next/
@@ -54,3 +60,5 @@ node_modules/
 *.docker
 docker-compose.override.yml
 .docker/
+/mysql_data/
+/.db_data/ 
