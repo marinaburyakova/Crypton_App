@@ -1,28 +1,22 @@
-import {
-  mysqlTable,
-  int,
-  varchar,
-  timestamp,
-  decimal,
-} from 'drizzle-orm/mysql-core'
+import { mysqlTable, int, varchar, timestamp, decimal } from 'drizzle-orm/mysql-core';
 
-//таблица пользователей
+// Таблица пользователей (остается прежней для онбординга)
 export const users = mysqlTable('users', {
   id: int('id').primaryKey().autoincrement(),
   phone: varchar('phone', { length: 20 }).notNull().unique(),
   kycStatus: varchar('kyc_status', { length: 20 }).default('PENDING'),
   createdAt: timestamp('created_at').defaultNow(),
-})
+});
 
-// Транзакции кошелька
+// КРИПТО-ТАБЛИЦА: Транзакции токенов
 export const transactions = mysqlTable('transactions', {
   id: int('id').primaryKey().autoincrement(),
-  // Связываем трансляцию с id пользователя
-  userId: int('user_id')
-    .notNull()
-    .references(() => users.id, { onDelete: 'cascade' }),
-  amount: decimal('amount', { precision: 12, scale: 2 }).notNull(), // Сумма перевода (например 1500.50)
-  type: varchar('type', { length: 20 }).notNull(), // 'deposit' (пополнение) или 'transfer' (перевод)
-  status: varchar('status', { length: 20 }).default('PENDING'), // 'SUCCESS', 'PENDING', 'FAILED'
+  userId: int('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  amount: decimal('amount', { precision: 18, scale: 6 }).notNull(), // Повышенная точность для крипты
+  tokenSymbol: varchar('token_symbol', { length: 10 }).notNull(), // 'USDT', 'TON', 'BTC'
+  network: varchar('network', { length: 20 }).notNull(), // 'TRON', 'TON-Network', 'Ethereum'
+  type: varchar('type', { length: 20 }).notNull(), // 'receive' (получение), 'send' (отправка), 'swap' (обмен)
+  txHash: varchar('tx_hash', { length: 80 }), // Хэш транзакции в блокчейне для прозрачности
+  status: varchar('status', { length: 20 }).default('SUCCESS'), // 'SUCCESS', 'PENDING', 'FAILED'
   createdAt: timestamp('created_at').defaultNow(),
-})
+});
