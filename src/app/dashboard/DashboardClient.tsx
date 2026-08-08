@@ -30,18 +30,7 @@ import {
   Cell,
 } from 'recharts'
 
-import { createTransaction } from './actions'
-
-// Данные для графика
-const chartData = [
-  { name: 'Пн', income: 400 },
-  { name: 'Вт', income: 300 },
-  { name: 'Ср', income: 500 },
-  { name: 'Чт', income: 700 },
-  { name: 'Пт', income: 600 },
-  { name: 'Сб', income: 800 },
-  { name: 'Вс', income: 900 },
-]
+import { createTransaction} from './actions'
 
 // Структура транзакции
 interface Transaction {
@@ -60,11 +49,18 @@ interface Transaction {
 // Цвета для диаграммы
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8']
 
+
+
 export default function DashboardClient({
   initialTransactions,
+  currentBalance,
+  weeklyChartData,
 }: {
   initialTransactions: Transaction[]
+  currentBalance: number,
+  weeklyChartData: { name: string; income: number }[];
 }) {
+  
   const [activeModal, setActiveModal] = useState<'send' | 'receive' | null>(
     null,
   )
@@ -160,18 +156,18 @@ export default function DashboardClient({
   const displayTransactions = initialTransactions.slice(0, 20)
 
   // Форматирование даты
-const formatDate = (date: string | Date | null | undefined) => {
-  if (!date) return ''
-  const d = typeof date === 'string' ? new Date(date) : date
-  if (!(d instanceof Date) || isNaN(d.getTime())) return ''
-  return d.toLocaleDateString('ru-RU', {
-    day: '2-digit',
-    month: '2-digit',
-    year: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-  })
-}
+  const formatDate = (date: string | Date | null | undefined) => {
+    if (!date) return ''
+    const d = typeof date === 'string' ? new Date(date) : date
+    if (!(d instanceof Date) || isNaN(d.getTime())) return ''
+    return d.toLocaleDateString('ru-RU', {
+      day: '2-digit',
+      month: '2-digit',
+      year: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+    })
+  }
 
   // Сокращение хэша
   const shortenHash = (hash: string | null) => {
@@ -222,7 +218,11 @@ const formatDate = (date: string | Date | null | undefined) => {
                 Доступный баланс
               </p>
               <h2 className="text-3xl sm:text-4xl font-black tracking-tight">
-                $2,450.85
+                $
+                {currentBalance.toLocaleString('en-US', {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
               </h2>
               <p className="text-xs text-indigo-200/80">≈ 1,245.50 TON</p>
             </div>
@@ -254,12 +254,32 @@ const formatDate = (date: string | Date | null | undefined) => {
               </span>
             </div>
             <Card className="p-2 sm:p-3 flex-1 bg-slate-900/50 border-slate-800 backdrop-blur-md w-full min-h-0">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={chartData} margin={{ top: 5, right: 5, left: -35, bottom: 0 }}>
+              <ResponsiveContainer
+                width="100%"
+                height="100%"
+              >
+                <AreaChart
+                  data={weeklyChartData} 
+                  margin={{ top: 5, right: 5, left: -35, bottom: 0 }}
+                >
                   <defs>
-                    <linearGradient id="colorIncome" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#22d3ee" stopOpacity={0.25} />
-                      <stop offset="95%" stopColor="#22d3ee" stopOpacity={0} />
+                    <linearGradient
+                      id="colorIncome"
+                      x1="0"
+                      y1="0"
+                      x2="0"
+                      y2="1"
+                    >
+                      <stop
+                        offset="5%"
+                        stopColor="#22d3ee"
+                        stopOpacity={0.25}
+                      />
+                      <stop
+                        offset="95%"
+                        stopColor="#22d3ee"
+                        stopOpacity={0}
+                      />
                     </linearGradient>
                   </defs>
                   <XAxis
@@ -330,8 +350,8 @@ const formatDate = (date: string | Date | null | undefined) => {
                           tx.type === 'RECEIVE'
                             ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
                             : tx.type === 'SEND'
-                            ? 'bg-rose-500/10 border-rose-500/20 text-rose-400'
-                            : 'bg-slate-800/50 border-slate-700/50 text-slate-300'
+                              ? 'bg-rose-500/10 border-rose-500/20 text-rose-400'
+                              : 'bg-slate-800/50 border-slate-700/50 text-slate-300'
                         }`}
                       >
                         {tx.type === 'RECEIVE' ? (
@@ -347,11 +367,13 @@ const formatDate = (date: string | Date | null | undefined) => {
                           {tx.type === 'RECEIVE'
                             ? 'Получено'
                             : tx.type === 'SEND'
-                            ? 'Отправлено'
-                            : tx.type || 'Транзакция'}
+                              ? 'Отправлено'
+                              : tx.type || 'Транзакция'}
                         </p>
                         <p className="text-xs text-slate-500 font-medium flex flex-wrap items-center gap-1">
-                          <span>{formatDate(tx.createdAt || tx.created_at)}</span>
+                          <span>
+                            {formatDate(tx.createdAt || tx.created_at)}
+                          </span>
                           {tx.txHash && (
                             <>
                               <span className="hidden sm:inline">•</span>
@@ -370,11 +392,15 @@ const formatDate = (date: string | Date | null | undefined) => {
                           tx.type === 'RECEIVE'
                             ? 'text-emerald-400'
                             : tx.type === 'SEND'
-                            ? 'text-rose-400'
-                            : 'text-slate-200'
+                              ? 'text-rose-400'
+                              : 'text-slate-200'
                         }`}
                       >
-                        {tx.type === 'RECEIVE' ? '+' : tx.type === 'SEND' ? '-' : ''}
+                        {tx.type === 'RECEIVE'
+                          ? '+'
+                          : tx.type === 'SEND'
+                            ? '-'
+                            : ''}
                         {tx.amount} {tx.tokenSymbol}
                       </p>
                       <div className="flex items-center justify-end gap-1">
@@ -384,7 +410,8 @@ const formatDate = (date: string | Date | null | undefined) => {
                           </span>
                         ) : tx.status === 'PENDING' ? (
                           <span className="text-[10px] font-bold text-yellow-500/80 bg-yellow-500/10 px-2 py-0.5 rounded-md flex items-center gap-0.5 whitespace-nowrap">
-                            <Activity className="w-2.5 h-2.5 animate-spin" /> В ожидании
+                            <Activity className="w-2.5 h-2.5 animate-spin" /> В
+                            ожидании
                           </span>
                         ) : (
                           <span className="text-[10px] font-bold text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded-md flex items-center gap-0.5 whitespace-nowrap">
@@ -413,7 +440,10 @@ const formatDate = (date: string | Date | null | undefined) => {
               ) : (
                 <div className="w-full h-full flex flex-col justify-between">
                   <div className="w-full h-52 sm:h-60 relative">
-                    <ResponsiveContainer width="100%" height="100%">
+                    <ResponsiveContainer
+                      width="100%"
+                      height="100%"
+                    >
                       <PieChart>
                         <Pie
                           data={tokenPieData}
@@ -440,10 +470,7 @@ const formatDate = (date: string | Date | null | undefined) => {
                             borderRadius: '12px',
                             color: '#fff',
                           }}
-                          formatter={(value) => [
-                            `${value} отб. ед.`,
-                            'Объем',
-                          ]}
+                          formatter={(value) => [`${value} отб. ед.`, 'Объем']}
                         />
                       </PieChart>
                     </ResponsiveContainer>
@@ -508,7 +535,10 @@ const formatDate = (date: string | Date | null | undefined) => {
 
                 {/* Модалка: Отправить */}
                 {activeModal === 'send' && (
-                  <form onSubmit={handleSend} className="space-y-4">
+                  <form
+                    onSubmit={handleSend}
+                    className="space-y-4"
+                  >
                     <h3 className="text-2xl font-bold">Отправить активы</h3>
                     <p className="text-sm text-slate-400">
                       Убедитесь, что адрес получателя корректен
@@ -601,7 +631,8 @@ const formatDate = (date: string | Date | null | undefined) => {
                         >
                           {copied ? (
                             <>
-                              <CheckCircle2 className="w-4 h-4 text-emerald-400" /> Скопировано!
+                              <CheckCircle2 className="w-4 h-4 text-emerald-400" />{' '}
+                              Скопировано!
                             </>
                           ) : (
                             <>

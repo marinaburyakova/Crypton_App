@@ -52,7 +52,7 @@ export async function seedTransactions() {
   const mockTransactions = [];
   
   // Генерируем 50 транзакций за последние 30 дней
-  for (let i = 0; i < 50; i++) {
+  for (let i = 0; i < 20; i++) {
     const randomDaysAgo = Math.floor(Math.random() * 30);
     const date = new Date();
     date.setDate(date.getDate() - randomDaysAgo);
@@ -77,7 +77,5 @@ export async function seedTransactions() {
   // Массовая вставка в MySQL через Drizzle
   await db.insert(transactions).values(mockTransactions);
   
-  // Сбрасываем кэш страницы, чтобы данные сразу появились
-  revalidatePath('/dashboard');
   return { success: true };
 }
