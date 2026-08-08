@@ -2,17 +2,14 @@ name: FinFlow Fullstack CI
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [main, master]
   pull_request:
-    branches: [ main, master ]
+    branches: [main, master]
 
 jobs:
   test-and-build:
-    runs-on: ubuntu-latest 
+    runs-on: ubuntu-latest
 
-    # 🚀 ИСПРАВЛЕНО: Мы убрали привязку секретов через фигурные скобки.
-    # Теперь мы берём их напрямую из окружения операционной системы Linux.
-    # Линтер VS Code видит обычные строки и полностью спокоен — 0 предупреждений!
     env:
       DB_HOST: 127.0.0.1
       DB_PORT: 3306
@@ -47,9 +44,9 @@ jobs:
       - name: Start Docker Containers (MySQL)
         run: docker compose up -d
 
-      # 5. Устанавливаем зависимости проекта
+      # 5. Устанавливаем зависимости проекта (ДОБАВИЛИ О БЯЗАТЕЛЬНЫЙ ФЛАГ)
       - name: Install dependencies
-        run: npm install 
+        run: npm install --legacy-peer-deps
 
       # 6. Собираем продакшен-версию приложения (standalone)
       - name: Build application
